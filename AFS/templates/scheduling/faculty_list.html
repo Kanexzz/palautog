@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Management - Faculty Scheduling System{% endblock %}
+{% block body_class %}faculty-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell faculty-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link active" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main faculty-main">
+        <header class="faculty-header">
+            <div>
+                <h1>Faculty Management</h1>
+                <p>Manage faculty information, specializations, and teaching loads</p>
+            </div>
+            <a class="add-faculty-btn" href="{% url 'admin:authentication_user_add' %}">＋ Add Faculty</a>
+        </header>
+
+        <form class="faculty-search" method="get">
+            <span class="search-icon">⌕</span>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search faculty by name, email, or department..." aria-label="Search faculty">
+        </form>
+
+        <section class="faculty-table-card">
+            <div class="table-responsive">
+                <table class="faculty-table">
+                    <thead>
+                        <tr>
+                            <th>Faculty Name</th>
+                            <th>Assigned Subjects</th>
+                            <th>Maximum Load</th>
+                            <th>Current Load</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in faculty_rows %}
+                            <tr>
+                                <td>
+                                    <div class="faculty-name-cell">
+                                        <strong>{{ row.display_name }}</strong>
+                                        <span>{{ row.department }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if row.subject_tags %}
+                                        <div class="subject-tags">
+                                            {% for tag in row.subject_tags %}
+                                                <span class="subject-chip">{{ tag }}</span>
+                                            {% endfor %}
+                                            {% if row.extra_subject_count > 0 %}
+                                                <span class="subject-chip subject-chip-muted">+{{ row.extra_subject_count }} more</span>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="empty-note">No assignments</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="load-number">{{ row.maximum_load }}</span>
+                                </td>
+                                <td>
+                                    <div class="current-load">
+                                        <span class="load-number load-number-{{ row.load_state }}">{{ row.current_load }}</span>
+                                        <div class="load-track" aria-hidden="true">
+                                            <span class="load-fill load-fill-{{ row.load_state }}" style="width: {{ row.load_percentage }}%;"></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-{{ row.status_class }}">{{ row.status_label }}</span>
+                                </td>
+                                <td>
+                                    <div class="action-icons">
+                                        <a href="{% url 'admin:authentication_user_change' row.faculty.user.pk %}" title="View"><span>◉</span></a>
+                                        <a href="{% url 'admin:authentication_user_change' row.faculty.user.pk %}" title="Edit"><span>✎</span></a>
+                                        <a href="#" title="Delete"><span>🗑</span></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="faculty-empty-state">
+                                        <h3>No faculty found</h3>
+                                        <p>Try a different search term or add a new faculty record.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="faculty-stats-grid">
+            <article class="mini-stat-card">
+                <span class="mini-stat-value">{{ summary.total_faculty }}</span>
+                <span class="mini-stat-label">Active Faculty</span>
+            </article>
+            <article class="mini-stat-card mini-stat-danger">
+                <span class="mini-stat-value">{{ summary.at_max_load }}</span>
+                <span class="mini-stat-label">At Maximum Load</span>
+            </article>
+            <article class="mini-stat-card mini-stat-green">
+                <span class="mini-stat-value">{{ summary.underutilized }}</span>
+                <span class="mini-stat-label">Underutilized</span>
+            </article>
+            <article class="mini-stat-card">
+                <span class="mini-stat-value">{{ summary.on_leave }}</span>
+                <span class="mini-stat-label">On Leave</span>
+            </article>
+        </section>
+    </main>
+</div>
+{% endblock %}

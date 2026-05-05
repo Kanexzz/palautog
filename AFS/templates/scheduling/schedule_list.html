@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Schedule - Faculty Scheduling System{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell faculty-schedule-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link active" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main faculty-schedule-main">
+        <header class="faculty-header">
+            <div>
+                <h1>Faculty Schedule</h1>
+                <p>View weekly BSIS class schedules for faculty members</p>
+            </div>
+            <div class="faculty-schedule-actions">
+                <button type="button" class="btn print-btn" onclick="window.print()">Print</button>
+                <a class="btn export-btn" href="#">Export PDF</a>
+            </div>
+        </header>
+
+        <section class="faculty-selector-card">
+            <form method="get" class="faculty-selector-form">
+                <label for="faculty">Select Faculty Member</label>
+                <div class="faculty-selector-shell">
+                    <span class="faculty-selector-icon">👤</span>
+                    <select id="faculty" name="faculty" onchange="this.form.submit()">
+                        {% for faculty in faculties %}
+                            <option value="{{ faculty.id }}" {% if selected_faculty and selected_faculty.id == faculty.id %}selected{% endif %}>
+                                {{ faculty.user.get_full_name|default:faculty.user.username }}{% if faculty.department %} - {{ faculty.department.name }}{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            <div class="faculty-selector-meta">
+                <span>Department: <strong>{% if selected_faculty and selected_faculty.department %}{{ selected_faculty.department.name }}{% else %}Unassigned{% endif %}</strong></span>
+                <span>Current Load: <strong>{{ current_load_sections }} / {{ maximum_sections }} sections</strong></span>
+                <span>Total Classes: <strong>{{ total_classes }}</strong></span>
+            </div>
+        </section>
+
+        <section class="faculty-timetable-card">
+            <div class="table-responsive">
+                <table class="faculty-timetable">
+                    <thead>
+                        <tr>
+                            <th class="time-col">Time</th>
+                            {% for day in days %}
+                                <th>{{ day }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in timetable_rows %}
+                            <tr>
+                                <td class="time-slot-cell">
+                                    <span class="time-start">{{ row.start_time|time:'H:i' }}</span>
+                                    <span class="time-end">{{ row.end_time|time:'H:i' }}</span>
+                                </td>
+                                {% for day_cell in row.day_cells %}
+                                    <td class="schedule-cell">
+                                        {% if day_cell.items %}
+                                            <div class="day-stack">
+                                                {% for entry in day_cell.items %}
+                                                    <article class="schedule-card schedule-card-{{ entry.card_color }}">
+                                                        <h3>{{ entry.subject.code }}</h3>
+                                                        <p>{{ entry.subject.name }}</p>
+                                                        <div class="schedule-card-meta">
+                                                            <span>{{ entry.section.code }}</span>
+                                                            <strong>{{ entry.room.code|default:'TBD' }}</strong>
+                                                        </div>
+                                                    </article>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <span class="slot-empty">-</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="faculty-empty-state">
+                                        <h3>No schedules available</h3>
+                                        <p>Generate schedules first or choose a different faculty member.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="faculty-info-grid">
+            <article class="info-panel">
+                <h2>Faculty Information</h2>
+                <dl class="info-panel-list">
+                    <div>
+                        <dt>Faculty:</dt>
+                        <dd>{% if selected_faculty %}{{ selected_faculty.user.get_full_name|default:selected_faculty.user.username }}{% else %}N/A{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Department:</dt>
+                        <dd>{% if selected_faculty and selected_faculty.department %}{{ selected_faculty.department.name }}{% else %}Unassigned{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Employee ID:</dt>
+                        <dd>{% if selected_faculty %}{{ selected_faculty.employee_id }}{% else %}N/A{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Maximum Sections:</dt>
+                        <dd>{{ maximum_sections }}</dd>
+                    </div>
+                    <div>
+                        <dt>Current Load:</dt>
+                        <dd>{{ current_load_sections }}</dd>
+                    </div>
+                </dl>
+            </article>
+
+            <article class="info-panel">
+                <h2>Schedule Details</h2>
+                <dl class="info-panel-list">
+                    <div>
+                        <dt>Academic Year:</dt>
+                        <dd>{% if semester %}{{ semester.academic_year.year_code }}{% else %}N/A{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Semester:</dt>
+                        <dd>{% if semester %}{% if semester.semester_number == 1 %}First Semester{% else %}Second Semester{% endif %}{% else %}N/A{% endif %}</dd>
+                    </div>
+                    <div>
+                        <dt>Generated:</dt>
+                        <dd>{{ generated_at|date:"F d, Y" }}</dd>
+                    </div>
+                    <div>
+                        <dt>Total Classes:</dt>
+                        <dd>{{ total_classes }}</dd>
+                    </div>
+                    <div>
+                        <dt>Sections:</dt>
+                        <dd>{{ current_load_sections }}</dd>
+                    </div>
+                </dl>
+            </article>
+        </section>
+    </main>
+</div>
+{% endblock %}

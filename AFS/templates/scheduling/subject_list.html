@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Subject Management - Faculty Scheduling System{% endblock %}
+{% block body_class %}subject-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell subject-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link active" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main subject-main">
+        <header class="subject-header">
+            <div>
+                <h1>Subject Management</h1>
+                <p>Manage BSIS course offerings, units, and curriculum requirements</p>
+            </div>
+            <a class="add-subject-btn" href="{% url 'admin:scheduling_subject_add' %}">＋ Add Subject</a>
+        </header>
+
+        <section class="year-tabs" aria-label="Filter by year">
+            {% for tab in year_tabs %}
+                <a class="year-tab {% if year == tab.value %}active{% endif %}" href="?q={{ query|urlencode }}&year={{ tab.value }}&department={{ department }}&type={{ subject_type }}">
+                    <span>{{ tab.label }}</span>
+                    <strong>{{ tab.count }}</strong>
+                </a>
+            {% endfor %}
+        </section>
+
+        <form class="subject-filters" method="get">
+            <div class="subject-search">
+                <span>⌕</span>
+                <input type="search" name="q" value="{{ query }}" placeholder="Search subjects..." aria-label="Search subjects">
+            </div>
+
+            <select name="department" aria-label="Filter by department">
+                <option value="all" {% if department == 'all' %}selected{% endif %}>All Departments</option>
+                {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if department == dept.id|stringformat:'s' %}selected{% endif %}>{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="type" aria-label="Filter by subject type">
+                <option value="all" {% if subject_type == 'all' %}selected{% endif %}>All Types</option>
+                <option value="lecture" {% if subject_type == 'lecture' %}selected{% endif %}>Lecture</option>
+                <option value="lab" {% if subject_type == 'lab' %}selected{% endif %}>Lab</option>
+                <option value="lecture-lab" {% if subject_type == 'lecture-lab' %}selected{% endif %}>Lecture-Lab</option>
+            </select>
+
+            <input type="hidden" name="year" value="{{ year }}">
+            <button class="subject-filter-btn" type="submit">Apply</button>
+        </form>
+
+        <section class="subject-grid" aria-label="Subjects">
+            {% for subject in subjects %}
+                <article class="subject-card">
+                    <div class="subject-card-mark">📖</div>
+                    <p class="subject-code">{{ subject.code }}</p>
+                    <h2>{{ subject.name }}</h2>
+                    <span class="subject-type">{{ subject.get_type_display|lower }}</span>
+
+                    <dl>
+                        <div><dt>Units:</dt><dd>{{ subject.units }}</dd></div>
+                        <div><dt>Year Level:</dt><dd>{{ subject.year_level }}</dd></div>
+                        <div><dt>Semester:</dt><dd>{{ subject.semester }}</dd></div>
+                    </dl>
+
+                    <p class="subject-department">{{ subject.department.name|default:'Unassigned' }}</p>
+                </article>
+            {% empty %}
+                <div class="subject-empty-state">
+                    <h3>No subjects found</h3>
+                    <p>Try changing filters or add a new subject record.</p>
+                </div>
+            {% endfor %}
+        </section>
+
+        <section class="subject-summary-grid">
+            <article class="subject-summary-card">
+                <strong>{{ summary.total_subjects }}</strong>
+                <span>Total Subjects</span>
+            </article>
+            <article class="subject-summary-card">
+                <strong>{{ summary.lecture_courses }}</strong>
+                <span>Lecture Courses</span>
+            </article>
+            <article class="subject-summary-card highlight">
+                <strong>{{ summary.lab_courses }}</strong>
+                <span>Lab Courses</span>
+            </article>
+        </section>
+    </main>
+</div>
+{% endblock %}

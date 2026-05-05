@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Schedule Generation - Faculty Scheduling System{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell generator-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link active" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main generator-main">
+        <header class="dashboard-header">
+            <div>
+                <h1>Schedule Generation</h1>
+                <p>Automatically assign BSIS faculty to subjects based on specialization, load, and availability</p>
+            </div>
+        </header>
+
+        <section class="generator-hero">
+            <div class="generator-hero-copy">
+                <h2>Automated Schedule Assignment</h2>
+                <p>Generate faculty assignments for the current semester. The algorithm avoids obvious faculty, section, and room clashes before saving new schedules.</p>
+
+                <form method="post" class="generator-actions">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary generator-btn">Generate Schedule</button>
+                    <span class="generator-note">Current semester: {{ current_year }} Sem {{ current_semester_number }}</span>
+                </form>
+            </div>
+
+            <div class="generator-hero-badge">✦</div>
+        </section>
+
+        <section class="stats-grid generator-stats" aria-label="Generation overview">
+            <article class="stat-card stat-blue">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value">{{ faculty_count }}</div>
+                <div class="stat-label">Faculty Members</div>
+            </article>
+            <article class="stat-card stat-purple">
+                <div class="stat-icon">📖</div>
+                <div class="stat-value">{{ subject_count }}</div>
+                <div class="stat-label">Subjects to Assign</div>
+            </article>
+            <article class="stat-card stat-green">
+                <div class="stat-icon">▣</div>
+                <div class="stat-value">{{ available_slots }}</div>
+                <div class="stat-label">Available Slots</div>
+            </article>
+            <article class="stat-card stat-orange">
+                <div class="stat-icon">🗓</div>
+                <div class="stat-value">{{ current_schedule_count }}</div>
+                <div class="stat-label">Existing Schedules</div>
+            </article>
+        </section>
+
+        {% if result %}
+            <section class="generator-result-grid">
+                <article class="panel panel-large generator-panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Generation Summary</h2>
+                            <p>What the generator created and what it skipped</p>
+                        </div>
+                    </div>
+
+                    <div class="subject-summary-grid generator-summary-grid">
+                        <article class="subject-summary-card">
+                            <strong>{{ result.created_count }}</strong>
+                            <span>Created Assignments</span>
+                        </article>
+                        <article class="subject-summary-card highlight">
+                            <strong>{{ result.skipped_existing }}</strong>
+                            <span>Already Scheduled</span>
+                        </article>
+                        <article class="subject-summary-card">
+                            <strong>{{ result.skipped_no_subjects }}</strong>
+                            <span>No Curriculum Match</span>
+                        </article>
+                        <article class="subject-summary-card">
+                            <strong>{{ result.skipped_no_faculty }}</strong>
+                            <span>No Faculty Match</span>
+                        </article>
+                    </div>
+                </article>
+            </section>
+        {% endif %}
+
+        <section class="generator-table-card">
+            <div class="panel-header mb-3">
+                <div>
+                    <h2>Recent Schedules</h2>
+                    <p>Latest assignments in the current semester</p>
+                </div>
+            </div>
+
+            {% if recent_schedules %}
+                <div class="table-responsive">
+                    <table class="faculty-table teaching-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Faculty</th>
+                                <th>Section</th>
+                                <th>Room</th>
+                                <th>Day & Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for schedule in recent_schedules %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ schedule.subject.code }}</strong><br>
+                                        <span class="text-muted">{{ schedule.subject.name }}</span>
+                                    </td>
+                                    <td>{{ schedule.faculty.user.get_full_name|default:schedule.faculty.user.username }}</td>
+                                    <td>{{ schedule.section.code }}</td>
+                                    <td>{{ schedule.room.code|default:'TBD' }}</td>
+                                    <td>{{ schedule.time_slot.day_of_week }} {{ schedule.time_slot.start_time|time:'H:i' }}-{{ schedule.time_slot.end_time|time:'H:i' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="subject-empty-state">
+                    <h3>No generated schedules yet</h3>
+                    <p>Run the generator to create the first batch of assignments.</p>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+</div>
+{% endblock %}

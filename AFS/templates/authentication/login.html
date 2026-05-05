@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - {{ site_name }}{% endblock %}
+{% block body_class %}login-page{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-left">
+        <div class="brand-row">
+            <div class="brand-mark">🎓</div>
+            <div class="brand-copy">
+                <span class="brand-name">{{ logo_text }}</span>
+                <span class="brand-subtitle">{{ university_name }}</span>
+            </div>
+        </div>
+
+        <div class="hero-copy">
+            <p class="eyebrow">Faculty Scheduling Platform</p>
+            <h1>Faculty Scheduling System Using Constraint-Based Optimization</h1>
+            <p class="hero-description">{{ tagline }}</p>
+        </div>
+
+        <div class="feature-grid">
+            <article class="feature-card">
+                <span class="feature-icon">✓</span>
+                <div>
+                    <h3>Automated Scheduling</h3>
+                    <p>AI-assisted faculty assignment and conflict reduction.</p>
+                </div>
+            </article>
+            <article class="feature-card">
+                <span class="feature-icon">✓</span>
+                <div>
+                    <h3>Load Management</h3>
+                    <p>Balance teaching workloads across departments.</p>
+                </div>
+            </article>
+        </div>
+
+        <div class="left-footer">
+            <p>BS Information Systems</p>
+            <p>AY 2025-2026</p>
+        </div>
+    </div>
+
+    <div class="login-right">
+        <div class="login-panel">
+            <div class="login-panel-header">
+                <h2>Welcome Back</h2>
+                <p>{{ description }}</p>
+            </div>
+
+            <div class="demo-account-box">
+                <div class="demo-account-header">
+                    <div class="demo-account-badge">👤</div>
+                    <div>
+                        <h3>Demo Account</h3>
+                        <p>Use the preloaded credentials below</p>
+                    </div>
+                    <button type="button" class="autofill-btn" onclick="autofillDemo()">Auto-fill</button>
+                </div>
+                <div class="demo-credentials">
+                    <div>
+                        <span class="credential-label">Username</span>
+                        <span class="credential-value">admin</span>
+                    </div>
+                    <div>
+                        <span class="credential-label">Password</span>
+                        <span class="credential-value">admin123</span>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'login' %}" class="login-form">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-shell">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" value="{{ username }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-shell">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+
+                <div class="form-footer">
+                    <label class="checkbox-wrapper" for="remember">
+                        <input type="checkbox" id="remember" name="remember_me" value="on">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#forgot-password">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+        </div>
+
+        <div class="login-support-text">
+            <p>© 2026 Carlos Hilado Memorial State University</p>
+            <p>BS Information Systems • Faculty Scheduling System Using Constraint-Based Optimization • AY 2025-2026</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

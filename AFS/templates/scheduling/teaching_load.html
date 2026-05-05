@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Teaching Load Management - Faculty Scheduling System{% endblock %}
+{% block body_class %}faculty-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell faculty-shell teaching-load-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link active" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main faculty-main">
+        <header class="faculty-header">
+            <div>
+                <h1>Teaching Load Management</h1>
+                <p>Monitor and manage BSIS faculty teaching workload distribution{% if current_semester %} for AY {{ current_semester.academic_year.year_code }} Sem {{ current_semester.semester_number }}{% endif %}</p>
+            </div>
+            <a class="add-faculty-btn" href="{% url 'admin:scheduling_teachingload_add' %}">＋ Add Load</a>
+        </header>
+
+        <section class="teaching-stats-grid" aria-label="Teaching load summary">
+            <article class="teaching-stat-card danger">
+                <span class="teaching-stat-swatch"></span>
+                <div class="teaching-stat-meta">
+                    <strong>{{ summary.overloaded }}</strong>
+                    <span>Overloaded Faculty</span>
+                </div>
+            </article>
+            <article class="teaching-stat-card balanced">
+                <span class="teaching-stat-swatch"></span>
+                <div class="teaching-stat-meta">
+                    <strong>{{ summary.balanced }}</strong>
+                    <span>Balanced Load</span>
+                </div>
+            </article>
+            <article class="teaching-stat-card warning">
+                <span class="teaching-stat-swatch"></span>
+                <div class="teaching-stat-meta">
+                    <strong>{{ summary.underutilized }}</strong>
+                    <span>Underutilized</span>
+                </div>
+            </article>
+            <article class="teaching-stat-card neutral">
+                <span class="teaching-stat-swatch"></span>
+                <div class="teaching-stat-meta">
+                    <strong>{{ summary.unassigned }}</strong>
+                    <span>Unassigned</span>
+                </div>
+            </article>
+        </section>
+
+        <form class="teaching-filter-bar" method="get">
+            <div class="faculty-search teaching-search">
+                <span class="search-icon">⌕</span>
+                <input type="search" name="q" value="{{ query }}" placeholder="Search faculty..." aria-label="Search faculty">
+            </div>
+
+            <select name="status" aria-label="Filter by workload status">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Faculty</option>
+                <option value="overloaded" {% if status_filter == 'overloaded' %}selected{% endif %}>Overloaded</option>
+                <option value="balanced" {% if status_filter == 'balanced' %}selected{% endif %}>Balanced</option>
+                <option value="underutilized" {% if status_filter == 'underutilized' %}selected{% endif %}>Underutilized</option>
+                <option value="unassigned" {% if status_filter == 'unassigned' %}selected{% endif %}>Unassigned</option>
+            </select>
+
+            <button class="subject-filter-btn" type="submit">Apply</button>
+        </form>
+
+        <section class="faculty-table-card">
+            <div class="table-responsive">
+                <table class="faculty-table teaching-table">
+                    <thead>
+                        <tr>
+                            <th>Faculty Name</th>
+                            <th>Department</th>
+                            <th>Current Load</th>
+                            <th>Maximum Load</th>
+                            <th>Load Progress</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in faculty_rows %}
+                            <tr>
+                                <td>
+                                    <div class="faculty-name-cell">
+                                        <strong>{{ row.display_name }}</strong>
+                                        <span>{{ row.employee_id }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ row.department }}</td>
+                                <td><span class="load-number load-number-{{ row.load_state }}">{{ row.current_load }}</span></td>
+                                <td>{{ row.maximum_load }}</td>
+                                <td>
+                                    <div class="teaching-load-progress">
+                                        <span class="teaching-load-percent">{{ row.load_percentage }}%</span>
+                                        <div class="teaching-progress-track" aria-hidden="true">
+                                            <span class="teaching-progress-fill teaching-progress-{{ row.load_state }}" style="width: {{ row.load_percentage }}%;"></span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-pill status-{{ row.status_class }}">{{ row.status_label }}</span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6">
+                                    <div class="faculty-empty-state">
+                                        <h3>No faculty found</h3>
+                                        <p>Try a different search or status filter.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

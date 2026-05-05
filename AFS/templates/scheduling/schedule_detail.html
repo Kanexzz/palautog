@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ schedule.subject.code }} - Schedule Details{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1f754a;">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <span style="background-color: #ffd700; color: #1f754a; padding: 5px 10px; border-radius: 4px; font-weight: bold;">👓</span>
+                CHMSU
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'schedule_list' %}">Schedules</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <a href="{% url 'schedule_list' %}" class="btn btn-outline-secondary mb-4">&larr; Back to Schedules</a>
+
+                <div class="card">
+                    <div class="card-header" style="background-color: #1f754a; color: white;">
+                        <h4 class="mb-0">{{ schedule.subject.code }} - {{ schedule.subject.name }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Subject Information</h6>
+                                <dl>
+                                    <dt>Code:</dt>
+                                    <dd>{{ schedule.subject.code }}</dd>
+
+                                    <dt>Title:</dt>
+                                    <dd>{{ schedule.subject.name }}</dd>
+
+                                    <dt>Department:</dt>
+                                    <dd>{{ schedule.subject.department.name|default:"N/A" }}</dd>
+
+                                    <dt>Units:</dt>
+                                    <dd>{{ schedule.subject.units }}</dd>
+
+                                    <dt>Type:</dt>
+                                    <dd>{{ schedule.subject.get_type_display }}</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Schedule Information</h6>
+                                <dl>
+                                    <dt>Faculty:</dt>
+                                    <dd>{{ schedule.faculty.user.get_full_name|default:schedule.faculty.user.username }}</dd>
+
+                                    <dt>Room:</dt>
+                                    <dd>
+                                        {% if schedule.room %}
+                                            {{ schedule.room.code }} ({{ schedule.room.building|default:"N/A" }}, Floor {{ schedule.room.floor|default:"N/A" }})
+                                        {% else %}
+                                            TBD
+                                        {% endif %}
+                                    </dd>
+
+                                    <dt>Day:</dt>
+                                    <dd>{{ schedule.time_slot.day_of_week }}</dd>
+
+                                    <dt>Time:</dt>
+                                    <dd>{{ schedule.time_slot.start_time|time:"H:i" }} - {{ schedule.time_slot.end_time|time:"H:i" }}</dd>
+
+                                    <dt>Semester:</dt>
+                                    <dd>{{ schedule.semester.academic_year.year_code }} Semester {{ schedule.semester.semester_number }}</dd>
+
+                                    <dt>Section:</dt>
+                                    <dd>{{ schedule.section.code }}</dd>
+
+                                    <dt>Status:</dt>
+                                    <dd>{% if schedule.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Inactive</span>{% endif %}</dd>
+                                </dl>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Room Details</h6>
+                                {% if schedule.room %}
+                                    <p>
+                                        <strong>{{ schedule.room.code }}</strong><br>
+                                        {{ schedule.room.building|default:"N/A" }}, Floor {{ schedule.room.floor|default:"N/A" }}<br>
+                                        Capacity: {{ schedule.room.capacity }} students
+                                    </p>
+                                {% else %}
+                                    <p>No room assigned yet.</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Faculty Member</h6>
+                                <p>
+                                    <strong>{{ schedule.faculty.user.get_full_name|default:schedule.faculty.user.username }}</strong><br>
+                                    Email: {{ schedule.faculty.user.email }}<br>
+                                    Employee ID: {{ schedule.faculty.employee_id|default:"N/A" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header" style="background-color: #1f754a; color: white;">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <button class="btn btn-primary w-100 mb-2">Print Schedule</button>
+                        <button class="btn btn-outline-primary w-100 mb-2">Export to Calendar</button>
+                        <button class="btn btn-outline-secondary w-100">Share</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="background-color: #1f754a; color: white;">
+                        <h5 class="mb-0">Schedule Info</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-6">Created:</dt>
+                            <dd class="col-6">{{ schedule.created_at|date:"M d, Y" }}</dd>
+
+                            <dt class="col-6">Updated:</dt>
+                            <dd class="col-6">{{ schedule.updated_at|date:"M d, Y" }}</dd>
+
+                            <dt class="col-6">Room Cap:</dt>
+                            <dd class="col-6">{{ schedule.room.capacity|default:"N/A" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+        <p>© 2026 Carlos Hilado Memorial State University</p>
+        <p>BS Information Systems • Faculty Scheduling System Using Constraint-Based Optimization • AY 2025-2026</p>
+    </footer>
+</div>
+{% endblock %}

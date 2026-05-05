@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Faculty Scheduling System{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell settings-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link active" href="{% url 'settings' %}"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main settings-main">
+        <header class="settings-header">
+            <div>
+                <h1>Settings</h1>
+                <p>Manage system preferences and configurations</p>
+            </div>
+        </header>
+
+        <div class="settings-grid">
+            <section class="settings-left">
+                <div class="settings-panel">
+                    <div class="settings-panel-header">
+                        <span class="settings-panel-icon">👤</span>
+                        <h2>Profile Settings</h2>
+                    </div>
+                    <div class="settings-panel-content">
+                        <div class="form-group">
+                            <label for="full-name">Full Name</label>
+                            <input type="text" id="full-name" value="{{ profile.full_name }}" readonly class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" value="{{ profile.email }}" readonly class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <input type="text" id="role" value="{{ profile.role }}" readonly class="form-control form-control-readonly">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="settings-panel-header">
+                        <span class="settings-panel-icon">📅</span>
+                        <h2>Academic Settings</h2>
+                    </div>
+                    <div class="settings-panel-content">
+                        <div class="form-group">
+                            <label for="academic-year">Academic Year</label>
+                            <select id="academic-year" class="form-control">
+                                {% for year in academic_years %}
+                                    <option value="{{ year.id }}" {% if current_semester and current_semester.academic_year.id == year.id %}selected{% endif %}>
+                                        {{ year.year_code }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="semester">Current Semester</label>
+                            <select id="semester" class="form-control">
+                                {% for sem in semesters %}
+                                    <option value="{{ sem.id }}" {% if current_semester.id == sem.id %}selected{% endif %}>
+                                        {% if sem.semester_number == 1 %}First Semester{% else %}Second Semester{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="time-slot">Default Time Slot Duration</label>
+                            <select id="time-slot" class="form-control">
+                                <option value="60">1 Hour</option>
+                                <option value="90">1.5 Hours</option>
+                                <option value="120">2 Hours</option>
+                                <option value="150">2.5 Hours</option>
+                                <option value="180">3 Hours</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-right">
+                <div class="settings-panel settings-panel-small">
+                    <div class="settings-panel-header">
+                        <span class="settings-panel-icon">🔒</span>
+                        <h2>Security</h2>
+                    </div>
+                    <div class="settings-panel-content">
+                        <a href="#" class="settings-link">Change Password</a>
+                        <a href="#" class="settings-link">Two-Factor Authentication</a>
+                        <a href="#" class="settings-link">Session Management</a>
+                    </div>
+                </div>
+
+                <div class="settings-panel settings-panel-small">
+                    <div class="settings-panel-header">
+                        <span class="settings-panel-icon">💾</span>
+                        <h2>Data Management</h2>
+                    </div>
+                    <div class="settings-panel-content">
+                        <a href="#" class="settings-link">Backup Database</a>
+                        <a href="#" class="settings-link">Export Data</a>
+                        <a href="#" class="settings-link">Import Data</a>
+                    </div>
+                </div>
+
+                <div class="settings-panel settings-panel-small">
+                    <div class="settings-panel-header">
+                        <span class="settings-panel-icon">💬</span>
+                        <h2>Support</h2>
+                    </div>
+                    <div class="settings-panel-content">
+                        <a href="#" class="settings-link">Documentation</a>
+                        <a href="#" class="settings-link">Contact Support</a>
+                        <a href="#" class="settings-link">Report Issue</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+{% endblock %}

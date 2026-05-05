@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Faculty Scheduling System{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link active" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <header class="dashboard-header">
+            <div>
+                <h1>Dashboard</h1>
+                <p>Faculty Scheduling System Using Constraint-Based Optimization - Overview</p>
+            </div>
+            <div class="updated-pill"><span>◔</span>Last updated: Just now</div>
+        </header>
+
+        <section class="stats-grid" aria-label="Summary metrics">
+            <article class="stat-card stat-blue">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value">{{ stats.total_faculty }}</div>
+                <div class="stat-label">Total Faculty</div>
+            </article>
+            <article class="stat-card stat-purple">
+                <div class="stat-icon">📖</div>
+                <div class="stat-value">{{ stats.total_subjects }}</div>
+                <div class="stat-label">Total Subjects</div>
+            </article>
+            <article class="stat-card stat-green">
+                <div class="stat-icon">▤</div>
+                <div class="stat-value">{{ stats.total_sections }}</div>
+                <div class="stat-label">Total Sections</div>
+            </article>
+            <article class="stat-card stat-orange">
+                <div class="stat-icon">🗓</div>
+                <div class="stat-value">{{ stats.scheduled_classes }}</div>
+                <div class="stat-label">Scheduled Classes</div>
+            </article>
+            <article class="stat-card stat-red">
+                <div class="stat-icon">⚠</div>
+                <div class="stat-value">{{ stats.unassigned_subjects }}</div>
+                <div class="stat-label">Unassigned Subjects</div>
+            </article>
+        </section>
+
+        <section class="dashboard-grid">
+            <article class="panel panel-large">
+                <div class="panel-header">
+                    <div>
+                        <h2>Teaching Load Distribution</h2>
+                        <p>Current vs Maximum capacity per faculty</p>
+                    </div>
+                </div>
+
+                <div class="chart chart-bars" aria-hidden="true">
+                    <div class="bar-group"><span class="bar current" style="height: 38%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.N</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 38%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.C</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 76%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.R</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 52%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.JL</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 14%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.S</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 38%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.B</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 14%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.D</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 14%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.T</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 14%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.TU</span></div>
+                    <div class="bar-group"><span class="bar current" style="height: 14%;"></span><span class="bar max" style="height: 76%;"></span><span class="bar-label">F.BI</span></div>
+                </div>
+
+                <div class="chart-legend">
+                    <span><i class="legend-dot current-dot"></i>Current Load</span>
+                    <span><i class="legend-dot max-dot"></i>Max Load</span>
+                </div>
+            </article>
+
+            <article class="panel panel-compact">
+                <div class="panel-header">
+                    <div>
+                        <h2>Schedule Status</h2>
+                        <p>Scheduled vs Unscheduled</p>
+                    </div>
+                </div>
+
+                <div class="chart chart-pie" aria-hidden="true">
+                    <div class="pie-ring"></div>
+                    <div class="pie-caption pie-left">Scheduled 91%</div>
+                    <div class="pie-caption pie-right">Unscheduled 9%</div>
+                </div>
+
+                <div class="status-legend">
+                    <div><span class="status-swatch scheduled"></span>Scheduled</div>
+                    <div><span class="status-swatch unscheduled"></span>Unscheduled</div>
+                </div>
+            </article>
+        </section>
+
+        <footer class="dashboard-footer">
+            <p>© 2026 Carlos Hilado Memorial State University</p>
+            <p>BS Information Systems • Faculty Scheduling System Using Constraint-Based Optimization • AY 2025-2026</p>
+        </footer>
+    </main>
+</div>
+{% endblock %}

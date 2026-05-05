@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports & Analytics - Faculty Scheduling System{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell reports-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link active" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main reports-main">
+        <header class="reports-header">
+            <div>
+                <h1>Reports & Analytics</h1>
+                <p>Generate insights on BSIS faculty schedules and teaching load distribution</p>
+            </div>
+            <a class="btn export-btn reports-export" href="#">⤓ Export PDF</a>
+        </header>
+
+        <section class="report-category-grid" aria-label="Report categories">
+            {% for card in summary_cards %}
+                <article class="report-category-card {% if card.active %}active{% endif %}">
+                    <span class="report-category-icon">{{ card.icon }}</span>
+                    <h2>{{ card.title }}</h2>
+                    <p>{{ card.description }}</p>
+                    {% if card.value %}
+                        <strong>{{ card.value }}</strong>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </section>
+
+        <section class="report-panel">
+            <div class="panel-header reports-panel-header">
+                <div>
+                    <h2>Faculty Teaching Load Report</h2>
+                    <p>Current vs Maximum load capacity</p>
+                </div>
+            </div>
+
+            <div class="chart chart-bars report-chart" aria-hidden="true">
+                {% for row in faculty_chart_rows %}
+                    <div class="bar-group">
+                        <span class="bar current" style="height: {{ row.current_height }}%;"></span>
+                        <span class="bar max" style="height: {{ row.max_height }}%;"></span>
+                        <span class="bar-label">{{ row.label }}</span>
+                    </div>
+                {% empty %}
+                    <div class="report-chart-empty">No teaching load data available.</div>
+                {% endfor %}
+            </div>
+
+            <div class="chart-tooltip-card">
+                <strong>F. R</strong>
+                <span>Current Load : 6</span>
+                <span>Max Load : 6</span>
+            </div>
+
+            <div class="chart-legend report-chart-legend">
+                <span><i class="legend-dot current-dot"></i>Current Load</span>
+                <span><i class="legend-dot max-dot"></i>Max Load</span>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Section Management - Faculty Scheduling System{% endblock %}
+{% block body_class %}subject-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-shell section-shell">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-mark">🎓</div>
+            <div>
+                <h2>CHMSU</h2>
+                <p>Schedule System</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <a class="sidebar-link" href="{% url 'dashboard' %}"><span>▣</span>Dashboard</a>
+            <a class="sidebar-link" href="{% url 'faculty_list' %}"><span>◫</span>Faculty</a>
+            <a class="sidebar-link" href="{% url 'subject_list' %}"><span>▤</span>Subjects</a>
+            <a class="sidebar-link active" href="{% url 'section_list' %}"><span>▥</span>Sections</a>
+            <a class="sidebar-link" href="{% url 'teaching_load' %}"><span>⇱</span>Teaching Load</a>
+            <a class="sidebar-link" href="{% url 'schedule_generate' %}"><span>✧</span>Schedule Generator</a>
+            <a class="sidebar-link" href="{% url 'schedule_list' %}"><span>▦</span>Faculty Schedule</a>
+            <a class="sidebar-link" href="{% url 'section_schedule' %}"><span>▧</span>Section Schedule</a>
+            <a class="sidebar-link" href="{% url 'reports' %}"><span>▨</span>Reports</a>
+            <a class="sidebar-link" href="#"><span>⚙</span>Settings</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>BS Information Systems</p>
+            <strong>AY 2025-2026 • Sem 1</strong>
+            <a class="logout-link" href="{% url 'logout' %}">↪ Logout</a>
+        </div>
+    </aside>
+
+    <main class="dashboard-main subject-main">
+        <header class="subject-header">
+            <div>
+                <h1>Section Management</h1>
+                <p>Manage class sections, program assignments, and student enrollment</p>
+            </div>
+            <a class="add-subject-btn" href="{% url 'admin:scheduling_section_add' %}">＋ Add Section</a>
+        </header>
+
+        <section class="year-tabs" aria-label="Filter by year">
+            {% for group in year_groups %}
+                <a class="year-tab {% if year == group.value %}active{% endif %}" href="?q={{ query|urlencode }}&year={{ group.value }}&program={{ program }}">
+                    <span>{{ group.label }}</span>
+                    <strong>{{ group.count }}</strong>
+                </a>
+            {% endfor %}
+        </section>
+
+        <form class="subject-filters" method="get">
+            <div class="subject-search">
+                <span>⌕</span>
+                <input type="search" name="q" value="{{ query }}" placeholder="Search sections..." aria-label="Search sections">
+            </div>
+
+            <select name="program" aria-label="Filter by program">
+                <option value="all" {% if program == 'all' %}selected{% endif %}>All Programs</option>
+                {% for item in programs %}
+                    <option value="{{ item.id }}" {% if program == item.id|stringformat:'s' %}selected{% endif %}>{{ item.code }} - {{ item.name }}</option>
+                {% endfor %}
+            </select>
+
+            <input type="hidden" name="year" value="{{ year }}">
+            <button class="subject-filter-btn" type="submit">Apply</button>
+        </form>
+
+        {% for group in year_groups %}
+            {% if group.count %}
+                <section class="mt-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <h2 class="mb-0" style="font-family: 'Manrope', 'Segoe UI', sans-serif; font-size: 28px; font-weight: 800; color: #153225;">{{ group.label }}</h2>
+                        <span class="year-tab active" style="min-height: auto; padding: 6px 12px; border-radius: 999px;">
+                            <span>{{ group.count }} sections</span>
+                        </span>
+                    </div>
+
+                    <div class="subject-grid">
+                        {% for section in group.sections %}
+                            <article class="subject-card">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <div>
+                                        <div class="subject-card-mark">▥</div>
+                                        <p class="subject-code">{{ section.code }}</p>
+                                        <h2>{{ section.program.code }} {{ section.year_level }}-{{ section.section_name }}</h2>
+                                    </div>
+                                    <div class="action-icons">
+                                        <a href="{% url 'admin:scheduling_section_change' section.pk %}" title="Edit"><span>✎</span></a>
+                                        <a href="{% url 'admin:scheduling_section_change' section.pk %}" title="View"><span>◉</span></a>
+                                        <a href="#" title="Delete"><span>🗑</span></a>
+                                    </div>
+                                </div>
+
+                                <span class="subject-type">{{ section.program.name }}</span>
+
+                                <dl>
+                                    <div><dt>Semester:</dt><dd>{% if section.semester %}{{ section.semester.semester_number }}{% else %}TBD{% endif %}</dd></div>
+                                    <div><dt>Students:</dt><dd>{{ section.student_count }}</dd></div>
+                                    <div><dt>Capacity:</dt><dd>{{ section.max_capacity }}</dd></div>
+                                    <div><dt>Schedules:</dt><dd>{{ section.active_schedule_count|default:0 }}</dd></div>
+                                </dl>
+
+                                <p class="subject-department">{% if section.semester %}{{ section.semester.academic_year.year_code }}{% else %}Academic Year TBD{% endif %}</p>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+        {% endfor %}
+
+        {% if visible_sections_count == 0 %}
+            <div class="subject-empty-state mt-4">
+                <h3>No sections found</h3>
+                <p>Try changing filters or add a new section record.</p>
+            </div>
+        {% endif %}
+
+        <section class="faculty-stats-grid mt-4">
+            <article class="mini-stat-card">
+                <span class="mini-stat-value">{{ summary.total_sections }}</span>
+                <span class="mini-stat-label">Total Sections</span>
+            </article>
+            <article class="mini-stat-card mini-stat-green">
+                <span class="mini-stat-value">{{ summary.total_students }}</span>
+                <span class="mini-stat-label">Total Students</span>
+            </article>
+            <article class="mini-stat-card">
+                <span class="mini-stat-value">{{ summary.average_class_size }}</span>
+                <span class="mini-stat-label">Avg. Class Size</span>
+            </article>
+            <article class="mini-stat-card mini-stat-danger">
+                <span class="mini-stat-value">{{ summary.programs }}</span>
+                <span class="mini-stat-label">Programs</span>
+            </article>
+        </section>
+    </main>
+</div>
+{% endblock %}
